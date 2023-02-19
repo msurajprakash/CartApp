@@ -11,19 +11,22 @@ class Cart extends React.Component {
                     name: 'Phone',
                     price: 12000,
                     Qty: 1,
-                    img: ''
+                    img: '',
+                    id: 1
                 },
                 {
                     name: 'Watch',
                     price: 2000,
                     Qty: 1,
-                    img: ''
+                    img: '',
+                    id: 2
                 },
                 {
                     name: 'Laptop',
                     price: 50000,
                     Qty: 1,
-                    img: ''
+                    img: '',
+                    id: 3
                 }
                 ]
     
@@ -36,7 +39,10 @@ class Cart extends React.Component {
         return (
             <div className="cart">
                 {products.map((product) =>{
-                    return <CartItem product={product} />
+                    return <CartItem 
+                        product={product} 
+                        key={products.id}
+                    />
                 })}
             </div>
         )

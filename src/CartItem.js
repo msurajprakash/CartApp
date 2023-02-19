@@ -2,56 +2,9 @@ import React from "react";
 
 class CartItem extends React.Component {
 
-    //increase call using AJAX
-    // testing() {
-    //     const promise = new Promise((resolve, reject) =>{
-    //         setTimeout(() =>{
-    //             resolve('done');
-    //         }, 5000)
-    //     })
-
-    //     promise.then(() =>{
-    //         //setState acts like synchronus call
-    //         this.setState({Qty: this.state.Qty + 10})
-    //         console.log('state', this.state)
-    //     })
-    // }
-
-    increaseQuantity = () => {
-        // console.log('this', this.state);
-        //setState form 1 --- it will not run again & again if called twice or thrice
-        // this.setState({
-        //     Qty: this.state.Qty + 1
-        // })
-
-        //form 2  --- it will run again & again if called twice or thrice
-        this.setState((prevState) =>{
-            return {
-                Qty: prevState.Qty + 1
-            }
-        }, () =>{
-            console.log(this.state);
-        })
-    }
-
-    deleteQuantity = () => {
-        // console.log('this', this.state);
-
-        const {Qty} = this.state;
-        if(Qty === 0){
-            return;
-        }
-        this.setState((prevState) =>{
-            return{
-                Qty: prevState.Qty - 1
-            }
-        }, () =>{
-            console.log(this.state);
-        })
-    }
-
     render () {
         const {name, price, Qty} = this.props.product;
+        const {product, onInscreaseQuantity, onDescreaseQuantity} = this.props;
         return (
             <div className="cart-item">
                 <div className="left-block">
@@ -67,13 +20,13 @@ class CartItem extends React.Component {
                         alt="increase" 
                         className="action-icons" 
                         src="https://img.icons8.com/ios-glyphs/256/plus-2-math.png"
-                        onClick={this.increaseQuantity}
+                        onClick={() => onInscreaseQuantity(product)}
                     />
                     <img 
                         alt="decrease" 
                         className="action-icons" 
                         src="https://img.icons8.com/material-rounded/256/minus-sign.png"
-                        onClick={this.deleteQuantity}
+                        onClick={() => onDescreaseQuantity(product)}
                     />
                     <img 
                         alt="delete" 

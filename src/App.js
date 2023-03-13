@@ -18,21 +18,23 @@ class App extends React.Component {
     //instead of using firebase .firestore(), we can use this.db
     this.db
       .collection('products')
+      // .where('price', '>', 10000)//to get/show the product according to price/qty..
+      // .orderBy('price', 'desc')//to sort the product in asc or desc order...
       //firstly we used .get() .then() but it won't auto update when changes in firebase
       //so now we have to use .onSnapshot and its and eventlistener
       .onSnapshot((snapshot) => {
-        console.log(snapshot);
+        // console.log(snapshot);
 
         snapshot.docs.map((doc) => {
           return doc.data();
         });
-          
+
         const products = snapshot.docs.map((doc) => {
           const data = doc.data();
 
           data['id'] = doc.id;
           return data;
-          
+
         })
 
         this.setState({
@@ -46,11 +48,24 @@ class App extends React.Component {
   handleIncreaseQuantity = (product) => {
     const { products } = this.state;
     const index = products.indexOf(product);
-    products[index].Qty += 1
+    // products[index].Qty += 1
 
-    this.setState({
-      products: products
-    })
+    // this.setState({
+    //   products: products
+    // })
+
+    const docRef = this.db.collection('products').doc(products[index].id);
+
+    docRef
+      .update({
+        Qty: products[index].Qty + 1
+      })
+      .then(() => {
+        console.log('Updated Successfully');
+      })
+      .catch((error) => {
+        console.log('Error :', error);
+      })
 
   }
 
@@ -62,20 +77,44 @@ class App extends React.Component {
       return;
     }
 
-    products[index].Qty -= 1
+    // products[index].Qty -= 1
 
-    this.setState({
-      products: products
-    })
+    // this.setState({
+    //   products: products
+    // })
+
+    const docRef = this.db.collection('products').doc(products[index].id);
+
+    docRef
+      .update({
+        Qty: products[index].Qty - 1
+      })
+      .then(() => {
+        console.log('Updated Successfully');
+      })
+      .catch((error) => {
+        console.log('Error :', error);
+      })
 
   }
 
   handleDeleteProduct = (id) => {
     const { products } = this.state;
-    const items = products.filter((item) => item.id !== id)
+    // const items = products.filter((item) => item.id !== id)
 
-    this.setState({
-      products: items
+    // this.setState({
+    //   products: items
+    // })
+
+    const docRef = this.db.collection('products').doc(id);
+    console.log(products);
+    docRef
+    .delete()
+    .then(() => {
+      console.log('Deleted Successfully');
+    })
+    .catch((error) => {
+      console.log('Error :', error);
     })
   }
 
@@ -125,7 +164,7 @@ class App extends React.Component {
     return (
       <div>
         <Navbar count={this.getCartCount()} />
-        <button onClick={this.addProduct} style={{fontSize: 10, padding: 10}}>Add a product</button>
+        {/* <button onClick={this.addProduct} style={{fontSize: 10, padding: 10}}>Add a product</button> */}
         <Cart
           products={products}
           onInscreaseQuantity={this.handleIncreaseQuantity}

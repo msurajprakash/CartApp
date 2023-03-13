@@ -1,37 +1,46 @@
 import React from "react";
 import Cart from "./Cart";
 import Navbar from "./Navbar";
+import firebase from 'firebase/compat/app';
 
 class App extends React.Component {
 
   constructor() {
     super();
     this.state = {
-      products: [
-        {
-          name: 'Phone',
-          price: 12000,
-          Qty: 1,
-          img: 'https://images.unsplash.com/photo-1605236453806-6ff36851218e?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=464&q=80',
-          id: 1
-        },
-        {
-          name: 'Watch',
-          price: 2000,
-          Qty: 1,
-          img: 'https://images.unsplash.com/photo-1542496658-e33a6d0d50f6?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80',
-          id: 2
-        },
-        {
-          name: 'Laptop',
-          price: 50000,
-          Qty: 1,
-          img: 'https://images.unsplash.com/photo-1611186871348-b1ce696e52c9?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80',
-          id: 3
-        }
-      ]
-
+      products: [],
+      loading: true
     }
+    this.db = firebase.firestore();
+  }
+
+  componentDidMount() {
+    //instead of using firebase .firestore(), we can use this.db
+    this.db
+      .collection('products')
+      //firstly we used .get() .then() but it won't auto update when changes in firebase
+      //so now we have to use .onSnapshot and its and eventlistener
+      .onSnapshot((snapshot) => {
+        console.log(snapshot);
+
+        snapshot.docs.map((doc) => {
+          return doc.data();
+        });
+          
+        const products = snapshot.docs.map((doc) => {
+          const data = doc.data();
+
+          data['id'] = doc.id;
+          return data;
+          
+        })
+
+        this.setState({
+          products,
+          loading: false
+        })
+
+      });
   }
 
   handleIncreaseQuantity = (product) => {
@@ -72,7 +81,7 @@ class App extends React.Component {
 
   getCartCount = () => {
 
-    const {products} = this.state;
+    const { products } = this.state;
     let count = 0;
 
     products.forEach((product) => {
@@ -83,7 +92,7 @@ class App extends React.Component {
 
   getCartTotal = () => {
 
-    const {products} = this.state;
+    const { products } = this.state;
 
     let cartTotal = 0;
 
@@ -94,18 +103,37 @@ class App extends React.Component {
     return cartTotal;
   }
 
+  addProduct = () => {
+    this.db
+      .collection('products')
+      .add({
+        name: 'shoes',
+        price: 1500,
+        Qty: 1,
+        img: 'https://images.unsplash.com/photo-1608231387042-66d1773070a5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8NHx8c2hvZXxlbnwwfHwwfHw%3D&auto=format&fit=crop&w=500&q=60'
+      })
+      .then((docRef) => {
+        console.log('The product has been added', docRef);
+      })
+      .catch((error) => {
+        console.log('Error :', error)
+      })
+  }
+
   render() {
-    const {products} = this.state
+    const { products, loading } = this.state
     return (
       <div>
-        <Navbar count={this.getCartCount()}/>
+        <Navbar count={this.getCartCount()} />
+        <button onClick={this.addProduct} style={{fontSize: 10, padding: 10}}>Add a product</button>
         <Cart
-        products={products} 
-        onInscreaseQuantity={this.handleIncreaseQuantity}
-        onDescreaseQuantity={this.handleDecreaseQuantity}
-        onDeleteProduct={this.handleDeleteProduct}
+          products={products}
+          onInscreaseQuantity={this.handleIncreaseQuantity}
+          onDescreaseQuantity={this.handleDecreaseQuantity}
+          onDeleteProduct={this.handleDeleteProduct}
         />
-        <div style={{fontSize: 20, padding: 10}}>TOTAL: {this.getCartTotal()}</div>
+        {loading && <h1>Loading page...</h1>}
+        <div style={{ fontSize: 20, padding: 10 }}>TOTAL: {this.getCartTotal()}</div>
       </div>
     );
   }
